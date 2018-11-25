@@ -17,4 +17,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('register', 'APIController@register');
+Route::group(['prefix' => 'v1'], function() {
+	Route::post('register', 'UsersController@register');
+	Route::post('login', 'UsersController@login');
+	Route::post('get-all-categories', 'CategoriesController@getAllCategories');
+	Route::post('post-ad', 'ProductsController@postAd');
+	Route::post('get-featured-products', 'ProductsController@getFeaturedProducts');
+	Route::post('get-products-by-category', 'ProductsController@getProductsByCategory');
+	Route::post('get-product-detail', 'ProductsController@getProductDetail');
+});
+
