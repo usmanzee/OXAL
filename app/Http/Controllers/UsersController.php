@@ -102,32 +102,26 @@ class UsersController extends Controller
 
 		$userId = $request->userId;
 		$phoneNumber = $request->phoneNumber;
-		$user = (new User)->getUserById($userId);
 
-		if(!is_null($user)) {
-			if(empty($user->phone_number) || $user->phone_number == $phoneNumber) {
+		$user = (new User)->getUserByPhoneNumber($phoneNumber);
 
-				$verificationCode = Helper::createRandomNumber(4);
-				User::where('id', $user->id)->update([
-					'phone_number' => $phoneNumber,
-					'verification_code' => $verificationCode
-				]);
-				$output = [
-					'status' => true,
-					'data' => 'verification code sent successfully.'
-				];
+		if(is_null($user) || (!is_null($user) && $userId == $user->id)) {
+			
+			$verificationCode = Helper::createRandomNumber(4);
+			User::where('id', $userId)->update([
+				'phone_number' => $phoneNumber,
+				'verification_code' => $verificationCode
+			]);
+			$output = [
+				'status' => true,
+				'data' => 'verification code sent successfully.'
+			];
 			} else {
 				$output = [
                     'status' => false,
                     'message' => 'Another user already exists with this number.'
                 ];
 			}
-		} else {
-			$output = [
-				'status' => false,
-				'message' => 'User does not exists.'
-			];
-		}
 		return response()->json($output);
 	}
 }
