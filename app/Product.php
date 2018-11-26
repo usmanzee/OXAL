@@ -11,7 +11,7 @@ class Product extends Model
 	
     protected $table = "products";
 
-    protected $fillable = ['user_id', 'category_id', 'phone_number', 'title', 'condition', 'description', 'price', 'province', 'city', 'area', 'longitude', 'laptitude', 'active', 'sold', 'featured'];
+    protected $fillable = ['user_id', 'category_id', 'title', 'condition', 'description', 'price', 'province', 'city', 'area', 'longitude', 'laptitude', 'featured', 'sold'];
 
     public function user() {
     	return $this->belongsTo('App\User');

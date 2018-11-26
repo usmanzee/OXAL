@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'cnic_or_passport_number'
+        'name', 'email', 'password', 'cnic_or_passport_number', 'phone_number', 'verification_code' ,'verified'
     ];
 
     /**
@@ -29,5 +29,10 @@ class User extends Authenticatable
 
     public function products() {
         return $this->hasMany('App\Product');
+    }
+
+    public function getUserById($id="") {
+
+        return self::where('id', $id)->first();
     }
 }

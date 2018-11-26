@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
-use App\User;
-use Validator;
 use Illuminate\Http\Request;
+use App\Helper;
+use Validator;
+use App\User;
+use Auth;
 
 class UsersController extends Controller
 {
@@ -75,5 +76,58 @@ class UsersController extends Controller
         }
 
         return response()->json($output);
+	}
+
+	public function getUserDetail(Request $request) {
+
+		$userId = $request->userId;
+		$user = (new User)->getUserById($userId);
+
+		if(!is_null($user)) {
+			$output = [
+				'status' => true,
+				'data' => $user
+			];
+		} else {
+			$output = [
+				'status' => false,
+				'message' => 'User does not exists.'
+			];
+		}
+
+		return response()->json($output);
+	}
+
+	public function updateUserPhoneNumberAndSendVerificationCode(Request $request) {
+
+		$userId = $request->userId;
+		$phoneNumber = $request->phoneNumber;
+		$user = (new User)->getUserById($userId);
+
+		if(!is_null($user)) {
+			if(empty($user->phone_number) || $user->phone_number == $phoneNumber) {
+
+				$verificationCode = Helper::createRandomNumber(4);
+				User::where('id', $user->id)->update([
+					'phone_number' => $phoneNumber,
+					'verification_code' => $verificationCode
+				]);
+				$output = [
+					'status' => true,
+					'data' => 'verification code sent successfully.'
+				];
+			} else {
+				$output = [
+                    'status' => false,
+                    'message' => 'Another user already exists with this number.'
+                ];
+			}
+		} else {
+			$output = [
+				'status' => false,
+				'message' => 'User does not exists.'
+			];
+		}
+		return response()->json($output);
 	}
 }

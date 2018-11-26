@@ -21,6 +21,8 @@ Route::group(['prefix' => 'v1'], function() {
 	Route::post('register', 'UsersController@register');
 	Route::post('login', 'UsersController@login');
 	Route::post('get-all-categories', 'CategoriesController@getAllCategories');
+	Route::post('get-user-detail', 'UsersController@getUserDetail');
+	Route::post('update-user-phone-number-and-send-verification-code', 'UsersController@updateUserPhoneNumberAndSendVerificationCode');
 	Route::post('post-ad', 'ProductsController@postAd');
 	Route::post('get-featured-products', 'ProductsController@getFeaturedProducts');
 	Route::post('get-products-by-category', 'ProductsController@getProductsByCategory');

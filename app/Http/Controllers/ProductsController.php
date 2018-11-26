@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\ProductImage;
 use App\Product;
+use App\Helper;
 use Validator;
+use App\User;
 use File;
 
 class ProductsController extends Controller
@@ -23,7 +25,8 @@ class ProductsController extends Controller
 			'city' => 'required',
 			'area' => 'required',
 			'longitude' => 'required',
-			'laptitude' => 'required'
+			'laptitude' => 'required',
+            'phone_number' => 'required'
 	    ]);
 
 	    if($validator->fails()) {
@@ -35,9 +38,10 @@ class ProductsController extends Controller
 	    }
 
 	    $input = $request->all();
+        $input['verification_code'] = Helper::createRandomNumber(4);
 	    $product = Product::create($input);
 
-	    $allowedfileExtension= ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+	    $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
 	    if($request->hasFile('images')) {
 	    	$images = $request->file('images');
 	    	foreach ($images as $key => $image) {
@@ -85,7 +89,7 @@ class ProductsController extends Controller
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
         $query = Product::selectRaw($selectRaw)->with('user');
-    	$query->where('featured', 1)->where('active', 1)->where('sold', 0);
+    	$query->where('featured', 1)->where('sold', 0);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
     	}
@@ -119,7 +123,7 @@ class ProductsController extends Controller
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
         $query = Product::selectRaw($selectRaw)->with('user');
-    	$query->where('category_id', $categoryId)->where('active', 1)->where('sold', 0);
+    	$query->where('category_id', $categoryId)->where('sold', 0);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
     	}
@@ -149,7 +153,7 @@ class ProductsController extends Controller
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
         $query = Product::selectRaw($selectRaw)->with('user');
-    	$query->where('id', $productId)->where('active', 1)->where('sold', 0);
+    	$query->where('id', $productId);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
     	}
