@@ -25,8 +25,7 @@ class ProductsController extends Controller
 			'city' => 'required',
 			'area' => 'required',
 			'longitude' => 'required',
-			'laptitude' => 'required',
-            'phone_number' => 'required'
+			'laptitude' => 'required'
 	    ]);
 
 	    if($validator->fails()) {
