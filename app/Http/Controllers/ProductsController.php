@@ -76,6 +76,29 @@ class ProductsController extends Controller
         return response()->json($output);
     }
 
+    public function getUserProducts(Request $request) {
+        $userId = $request->userId;
+        $limit = 15;
+        $skip = ($page-1) * $limit;
+
+        $userProducts = Product::where('user_id', $userId)->get();
+
+        if($userProducts->count()) {
+            $output = [
+                'status' => true,
+                'data' => $userProducts
+            ];
+        } else {
+            $output = [
+                'status' => false,
+                'message' => 'No feature ad found.'
+            ];
+        }
+
+        return response()->json($output);
+
+    }
+
     public function getFeaturedProducts(Request $request) {
 
     	$laptitude = (isset($request->laptitude)) ? $request->laptitude : '';
