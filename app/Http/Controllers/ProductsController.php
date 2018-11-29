@@ -78,6 +78,7 @@ class ProductsController extends Controller
 
     public function getUserProducts(Request $request) {
         $userId = $request->userId;
+        $page = (isset($request->page) && $request->page) ? $request->page : 1;
         $limit = 15;
         $skip = ($page-1) * $limit;
 
