@@ -76,6 +76,36 @@ class ProductsController extends Controller
         return response()->json($output);
     }
 
+    public function searchProducts(Request $request) {
+        $searchedWord = $request->searchedWord;
+        $page = (isset($request->page) && $request->page) ? $request->page : 1;
+        $limit = 15;
+        $skip = ($page-1) * $limit;
+
+        $selectRaw = "*";
+        $selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
+
+        $query = Product::selectRaw($selectRaw)->with('user');
+        $query->where('title', 'LIKE', '%' .$searchedWord. '%')->orwhere('description', 'LIKE', '%' .$searchedWord. '%')->where('sold', 0);
+        if(!empty($laptitude) && !empty($longitude)) {
+            $query->orderBy('distance_in_km', 'ASC');
+        }
+        $products = $query->skip($skip)->take($limit)->get();
+        if($products->count()) {
+            $output = [
+                'status' => true,
+                'data' => $products
+            ];
+        } else {
+            $output = [
+                'status' => false,
+                'message' => 'No ad found.'
+            ];
+        }
+
+        return response()->json($output);
+    }
+
     public function getUserProducts(Request $request) {
         $userId = $request->userId;
         $page = (isset($request->page) && $request->page) ? $request->page : 1;

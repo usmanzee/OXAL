@@ -24,6 +24,7 @@ Route::group(['prefix' => 'v1'], function() {
 	Route::post('get-user-detail', 'UsersController@getUserDetail');
 	Route::post('update-user-phone-number-and-send-verification-code', 'UsersController@updateUserPhoneNumberAndSendVerificationCode');
 	Route::post('post-ad', 'ProductsController@postAd');
+	Route::post('search-products', 'ProductsController@searchProducts');
 	Route::post('get-user-products', 'ProductsController@getUserProducts');
 	Route::post('get-featured-products', 'ProductsController@getFeaturedProducts');
 	Route::post('get-products-by-category', 'ProductsController@getProductsByCategory');
