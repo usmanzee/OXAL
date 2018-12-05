@@ -12,6 +12,12 @@ use File;
 
 class ProductsController extends Controller
 {
+    public function index() {
+        $products = Product::with('user')->with('category')->get();
+
+        return view('products/index', compact('products'));
+    }
+
     public function postAd(Request $request) {
 
     	$validator = Validator::make($request->all(), [

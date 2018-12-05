@@ -18,3 +18,15 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::group(['prefix' => 'users'], function() {
+	Route::get('/', 'UsersController@index');
+});
+
+Route::group(['prefix' => 'categories'], function() {
+	Route::get('/', 'CategoriesController@index');
+});
+
+Route::group(['prefix' => 'products'], function() {
+	Route::get('/', 'ProductsController@index');
+});
