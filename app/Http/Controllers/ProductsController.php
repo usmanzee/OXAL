@@ -85,8 +85,13 @@ class ProductsController extends Controller
 
         $selectRaw = "*";
         $selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
+        
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
-        $query = Product::selectRaw($selectRaw)->with('user');
+        $query = Product::selectRaw($selectRaw)->with('user')
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }]);
         $query->where('title', 'LIKE', '%' .$searchedWord. '%')->orwhere('description', 'LIKE', '%' .$searchedWord. '%')->where('sold', 0);
         if(!empty($laptitude) && !empty($longitude)) {
             $query->orderBy('distance_in_km', 'ASC');
@@ -219,7 +224,7 @@ class ProductsController extends Controller
 
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
-        
+
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
         $query = Product::selectRaw($selectRaw)->with('user')
