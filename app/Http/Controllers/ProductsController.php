@@ -8,6 +8,7 @@ use App\Product;
 use App\Helper;
 use Validator;
 use App\User;
+use Config;
 use File;
 
 class ProductsController extends Controller
@@ -52,7 +53,7 @@ class ProductsController extends Controller
 
 	    		if(in_array($extension, $allowedfileExtension)) {
 
-	    			$path = public_path('Product Images');
+	    			$path = public_path('product_images');
 					if(!File::exists($path)) {
 						File::makeDirectory($path, $mode = 0777, true, true);
 					}
@@ -112,7 +113,12 @@ class ProductsController extends Controller
         $limit = 15;
         $skip = ($page-1) * $limit;
 
-        $userProducts = Product::where('user_id', $userId)->get();
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
+        $userProducts = Product::where('user_id', $userId)
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }])
+                        ->get();
 
         if($userProducts->count()) {
             $output = [
@@ -140,7 +146,7 @@ class ProductsController extends Controller
 
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
-        $path = public_path('Product Images');
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
         $query = Product::selectRaw($selectRaw)->with('user')
                         ->with(['images' => function($imagesQuery) use ($path) {
@@ -179,7 +185,12 @@ class ProductsController extends Controller
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $query = Product::selectRaw($selectRaw)->with('user');
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
+
+        $query = Product::selectRaw($selectRaw)->with('user')
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }]);
     	$query->where('category_id', $categoryId)->where('sold', 0);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
@@ -208,8 +219,13 @@ class ProductsController extends Controller
 
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
+        
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
-        $query = Product::selectRaw($selectRaw)->with('user');
+        $query = Product::selectRaw($selectRaw)->with('user')
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }]);
     	$query->where('id', $productId);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
