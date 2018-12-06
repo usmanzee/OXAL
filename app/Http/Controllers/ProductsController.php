@@ -143,7 +143,7 @@ class ProductsController extends Controller
         $path = public_path('Product Images');
 
         $query = Product::selectRaw($selectRaw)->with('user')
-                        ->with(['images' => function($imagesQuery) {
+                        ->with(['images' => function($imagesQuery) use ($path) {
                                 $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
                         }]);
     	$query->where('featured', 1)->where('sold', 0);
