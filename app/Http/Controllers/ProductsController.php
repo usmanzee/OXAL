@@ -140,8 +140,12 @@ class ProductsController extends Controller
 
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
+        $path = public_path('Product Images');
 
-        $query = Product::selectRaw($selectRaw)->with('user');
+        $query = Product::selectRaw($selectRaw)->with('user')
+                        ->with(['images' => function($imagesQuery) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }]);
     	$query->where('featured', 1)->where('sold', 0);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
