@@ -31,6 +31,11 @@
                     <i class="fa fa-product-hunt"></i> <span>Products(Ads)</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ url('admin/reviews') }}">
+                    <i class="fa fa-product-hunt"></i> <span>Reviews</span>
+                </a>
+            </li>
         </ul>
     </section>
 </aside>

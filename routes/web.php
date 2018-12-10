@@ -20,11 +20,9 @@ Route::get('/', function () {
 Route::get('admin/login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('admin/login', 'Auth\LoginController@login');
 Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function() {
-
 	Route::post('logout', 'Auth\LoginController@logout')->name('logout');
-
 	Route::get('/', 'HomeController@index');
-	//Route::get('login', 'HomeController@login');
+	Route::get('reviews', 'UsersController@allReviews');
 
 	Route::group(['prefix' => 'users'], function() {
 		Route::get('/', 'UsersController@index');

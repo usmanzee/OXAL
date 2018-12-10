@@ -123,6 +123,11 @@ class UsersController extends Controller
         return redirect('admin/users');
 	}
 
+	public function allReviews() {
+		$reviews = UserReview::with('user')->with('reviewer')->get();
+		return view('reviews', compact('reviews'));
+	}
+
 	public function reviews($id) {
 		$userReviews = UserReview::with('user')->with('reviewer')->where('user_id', $id)->get();
 		return view('users/reviews', compact('userReviews'));
