@@ -19,14 +19,21 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::group(['prefix' => 'users'], function() {
-	Route::get('/', 'UsersController@index');
-});
+Route::group(['prefix' => 'admin'], function() {
 
-Route::group(['prefix' => 'categories'], function() {
-	Route::get('/', 'CategoriesController@index');
-});
+	Route::group(['prefix' => 'users'], function() {
+		Route::get('/', 'UsersController@index');
+		Route::get('add', 'UsersController@add');
+		Route::post('store', 'UsersController@store');
+		Route::get('edit/{id}', 'UsersController@edit');
+		Route::post('update/{id}', 'UsersController@update');
+	});
 
-Route::group(['prefix' => 'products'], function() {
-	Route::get('/', 'ProductsController@index');
+	Route::group(['prefix' => 'categories'], function() {
+		Route::get('/', 'CategoriesController@index');
+	});
+
+	Route::group(['prefix' => 'products'], function() {
+		Route::get('/', 'ProductsController@index');
+	});
 });

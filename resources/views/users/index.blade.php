@@ -5,12 +5,10 @@
 @endsection
 <div class="content-wrapper">
     <section class="content-header">
-        <h1>
-            Users
-        </h1>
+        <h1>Users</h1>
     </section>
     <section class="content-header">
-        <button class="btn btn-primary">Add New User</button>
+        <a href="{!! url('admin/users/add') !!}" class="btn btn-primary">Add New User</a>
     </section>
     <section class="content">
         <div class="row">
@@ -43,7 +41,7 @@
                                     <td>@if($user->verified) Yes @else No @endif</td>
                                     <td>@if($user->verified) Admin @else Simple User @endif</td>
                                     <td>
-                                        <a href="#" class="btn btn-primary btn-sm">Edit</a>
+                                        <a href="{!! url('admin/users/edit/'.$user->id) !!}" class="btn btn-primary btn-sm">Edit</a>
                                         <a href="#" class="btn btn-danger btn-sm">Delete</a>
                                     </td>
                                 </tr>
@@ -71,15 +69,7 @@
 <script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#example1').DataTable()
-        $('#example2').DataTable({
-            'paging'      : true,
-            'lengthChange': false,
-            'searching'   : false,
-            'ordering'    : true,
-            'info'        : true,
-            'autoWidth'   : false
-        });
+        $('#example1').DataTable();
     });
 </script>
 @endsection

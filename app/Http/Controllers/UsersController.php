@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Helper;
-use Validator;
-use App\User;
+use File;
 use Auth;
+use Session;
+use Redirect;
+use App\User;
+use Validator;
+use App\Helper;
+use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
@@ -16,11 +19,100 @@ class UsersController extends Controller
 		return view('users/index', compact('users'));
 	}
 
+	public function add() {
+		return view('users/add');
+	}
+
+	public function store(Request $request) {
+		$this->validate($request,[
+            'name' => 'required',
+	        'email' => 'required|email|unique:users',
+	        'password' => 'required',
+	        'phone_number' => 'required',
+	        'cnic_or_passport_number' => 'required'
+        ]);
+
+		$input = $request->all();
+		$input['password'] = bcrypt($input['password']);
+        $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+	    if($request->hasFile('file')) {
+	    	$file = $request->file('file');
+    		$extension = $file->getClientOriginalExtension();
+    		$uploadNameWithoutExt = date('Ymd-His');
+    		$uploadName = date('Ymd-His').'.'.$extension;
+
+    		if(in_array($extension, $allowedfileExtension)) {
+
+    			$path = public_path('user_avatars');
+				if(!File::exists($path)) {
+					File::makeDirectory($path, $mode = 0777, true, true);
+				}
+    			$file->move($path, $uploadName);
+
+		        $input['avatar_name'] = $uploadName;
+		        $input['avatar_name_without_ext'] = $uploadNameWithoutExt;
+		        $input['avatar_ext'] = $extension;
+    		}
+	    }
+
+        $user = User::create($input);
+
+        Session::put('success', 'User created successfully.');
+        return redirect('admin/users');
+	}
+
+	public function edit($id) {
+		$user = User::where('id', $id)->first();
+		return view('users/edit', compact('user'));
+	}
+
+	public function update($id, Request $request) {
+
+		$this->validate($request,[
+            'name' => 'required',
+	        'email' => 'required|email',
+	        'phone_number' => 'required',
+	        'cnic_or_passport_number' => 'required'
+        ]);
+
+        $params = [
+        	'name' => $request->name,
+			'email' => $request->email,
+			'phone_number' => $request->phone_number,
+			'cnic_or_passport_number' => $request->cnic_or_passport_number,
+        ];
+
+        $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+	    if($request->hasFile('file')) {
+	    	$file = $request->file('file');
+    		$extension = $file->getClientOriginalExtension();
+    		$uploadNameWithoutExt = date('Ymd-His');
+    		$uploadName = date('Ymd-His').'.'.$extension;
+
+    		if(in_array($extension, $allowedfileExtension)) {
+
+    			$path = public_path('user_avatars');
+				if(!File::exists($path)) {
+					File::makeDirectory($path, $mode = 0777, true, true);
+				}
+    			$file->move($path, $uploadName);
+
+		        $params['avatar_name'] = $uploadName;
+		        $params['avatar_name_without_ext'] = $uploadNameWithoutExt;
+		        $params['avatar_ext'] = $extension;
+    		}
+	    }
+        User::where('id', $id)->update($params);
+
+        Session::put('success', 'User updated successfully.');
+        return redirect('admin/users');
+	}
+
 	public function register(Request $request) {
 
 	    $validator = Validator::make($request->all(), [
 	        'name' => 'required',
-	        'email' => 'required|email',
+	        'email' => 'required|email|unique:users',
 	        'password' => 'required',
 	        'cnic_or_passport_number' => 'required'
 	    ]);
