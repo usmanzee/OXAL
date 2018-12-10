@@ -10,7 +10,7 @@
         </h1>
     </section>
     <section class="content-header">
-        <button class="btn btn-primary">Add New Category</button>
+        <a href="{!! url('admin/categories/add') !!}" class="btn btn-primary">Add New Category</a>
     </section>
     <section class="content">
         <div class="row">
@@ -35,8 +35,11 @@
                                     <td>{{ $category->id }}</td>
                                     <td>{{ $category->title }}</td>
                                     <td>
-                                        <a href="#" class="btn btn-primary btn-sm">Edit</a>
-                                        <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                                        <a href="{!! url('admin/categories/edit/'.$category->id) !!}" class="btn btn-primary btn-sm">Edit</a>
+                                        <a class="btn btn-danger btn-sm" id="delete_button_{{ $category->id }}" categoryId = "{{ $category->id }}" onclick="deleteFormSubmit(this)">Delete</a>
+                                        <form id="delete_category_form_{{ $category->id }}" action="{{ action('CategoriesController@delete', $category->id) }}" method="POST" style="display: none;">
+                                            {{ csrf_field() }}
+                                        </form>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -62,14 +65,14 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $('#example1').DataTable()
-        $('#example2').DataTable({
-            'paging'      : true,
-            'lengthChange': false,
-            'searching'   : false,
-            'ordering'    : true,
-            'info'        : true,
-            'autoWidth'   : false
-        });
     });
+    function deleteFormSubmit(input) {
+        var categoryId = $(input).attr('categoryId');
+        var result = confirm("Want to delete?");
+        if (result) {
+            $("#delete_category_form_"+categoryId).submit();
+
+        }
+    }
 </script>
 @endsection

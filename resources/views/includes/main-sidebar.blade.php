@@ -11,23 +11,23 @@
         <ul class="sidebar-menu" data-widget="tree">
             <li class="header">MAIN MENU</li>
             <li>
-                <a href="pages/widgets.html">
-                    <i class="fa fa-th"></i> <span>Dashboard</span>
+                <a href="{{ url('admin') }}">
+                    <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                 </a>
             </li>
             <li>
-                <a href="pages/widgets.html">
-                    <i class="fa fa-th"></i> <span>Users</span>
+                <a href="{{ url('admin/users') }}">
+                    <i class="fa fa-users"></i> <span>Users</span>
                 </a>
             </li>
             <li>
-                <a href="pages/widgets.html">
+                <a href="{{ url('admin/categories') }}">
                     <i class="fa fa-th"></i> <span>Categories</span>
                 </a>
             </li>
             <li>
-                <a href="pages/widgets.html">
-                    <i class="fa fa-th"></i> <span>Products(Ads)</span>
+                <a href="{{ url('admin/products') }}">
+                    <i class="fa fa-product-hunt"></i> <span>Products(Ads)</span>
                 </a>
             </li>
         </ul>

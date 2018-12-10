@@ -8,7 +8,7 @@
         <h1>Products</h1>
     </section>
     <section class="content-header">
-        <button class="btn btn-primary">Add New Product</button>
+        <a href="{!! url('admin/products/add') !!}" class="btn btn-primary">Add New Product</a>
     </section>
     <section class="content">
         <div class="row">
@@ -59,8 +59,13 @@
                                     <td>{{ $product->category->title }}</td>
                                     <td>{{ $product->created_at }}</td>
                                     <td>
-                                        <a href="#" class="btn btn-primary btn-sm">Edit</a>
-                                        <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                                        <!-- <a href="#" class="btn btn-primary btn-sm">Edit</a>
+                                        <a href="#" class="btn btn-danger btn-sm">Delete</a> -->
+                                        <a href="{!! url('admin/products/edit/'.$product->id) !!}" class="btn btn-primary btn-sm">Edit</a>
+                                        <a class="btn btn-danger btn-sm" id="delete_button_{{ $product->id }}" productId = "{{ $product->id }}" onclick="deleteFormSubmit(this)">Delete</a>
+                                        <form id="delete_product_form_{{ $product->id }}" action="{{ action('ProductsController@delete', $product->id) }}" method="POST" style="display: none;">
+                                            {{ csrf_field() }}
+                                        </form>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -100,5 +105,14 @@
     $(document).ready(function() {
         $('#example1').DataTable();
     });
+
+    function deleteFormSubmit(input) {
+        var productId = $(input).attr('productId');
+        var result = confirm("Want to delete?");
+        if (result) {
+            $("#delete_product_form_"+productId).submit();
+
+        }
+    }
 </script>
 @endsection

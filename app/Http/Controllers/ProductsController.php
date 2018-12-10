@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\ProductImage;
-use App\Product;
-use App\Helper;
-use Validator;
-use App\User;
 use File;
+use Session;
+use App\User;
+use Validator;
+use App\Helper;
+use App\Product;
+use App\Category;
+use App\ProductImage;
+use Illuminate\Http\Request;
 
 class ProductsController extends Controller
 {
@@ -16,6 +18,121 @@ class ProductsController extends Controller
         $products = Product::with('user')->with('category')->get();
 
         return view('products/index', compact('products'));
+    }
+
+    public function add() {
+
+        $users = User::all();
+        $categories = Category::all();
+        return view('products/add', compact('users', 'categories'));
+    }
+
+    public function store(Request $request) {
+
+        $this->validate($request, [
+            'title' => 'required',
+            'condition' => 'required',
+            'description' => 'required',
+            'user_id' => 'required',
+            'category_id' => 'required',
+            'price' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'area' => 'required',
+            'longitude' => 'required',
+            'laptitude' => 'required'
+        ]);
+
+        $input = $request->all();
+
+        $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+        if($request->hasFile('images')) {
+            $images = $request->file('images');
+            foreach ($images as $key => $image) {
+
+                //$imageName = $image->getClientOriginalName();
+                $extension = $image->getClientOriginalExtension();
+                $uploadNameWithoutExt = date('Ymd-His').'-'.$key;
+                $uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
+
+                if(in_array($extension, $allowedfileExtension)) {
+
+                    $path = public_path('Product Images');
+                    if(!File::exists($path)) {
+                        File::makeDirectory($path, $mode = 0777, true, true);
+                    }
+                    $image->move($path, $uploadName);
+                    $productImageParams = [
+                        'product_id' => $product->id,
+                        'name' => $uploadName,
+                        'name_without_ext' => $uploadNameWithoutExt,
+                        'ext' => $extension
+                    ];
+                    ProductImage::create($productImageParams);
+                }
+            }
+        }
+
+        $user = Product::create($input);
+
+        Session::put('success', 'Product created successfully.');
+        return redirect('admin/products');
+    }
+
+    public function edit($id) {
+
+        $users = User::all();
+        $categories = Category::all();
+        $product = Product::with('images')->where('id', $id)->first();
+        return view('products/edit', compact('users', 'categories', 'product'));
+    }
+
+    public function update($id, Request $request) {
+
+        $this->validate($request,[
+            'name' => 'required',
+            'email' => 'required|email',
+            'phone_number' => 'required',
+            'cnic_or_passport_number' => 'required'
+        ]);
+
+        $params = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'cnic_or_passport_number' => $request->cnic_or_passport_number,
+        ];
+
+        $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+        if($request->hasFile('file')) {
+            $file = $request->file('file');
+            $extension = $file->getClientOriginalExtension();
+            $uploadNameWithoutExt = date('Ymd-His');
+            $uploadName = date('Ymd-His').'.'.$extension;
+
+            if(in_array($extension, $allowedfileExtension)) {
+
+                $path = public_path('user_avatars');
+                if(!File::exists($path)) {
+                    File::makeDirectory($path, $mode = 0777, true, true);
+                }
+                $file->move($path, $uploadName);
+
+                $params['avatar_name'] = $uploadName;
+                $params['avatar_name_without_ext'] = $uploadNameWithoutExt;
+                $params['avatar_ext'] = $extension;
+            }
+        }
+        User::where('id', $id)->update($params);
+
+        Session::put('success', 'Product updated successfully.');
+        return redirect('admin/products');
+    }
+
+    public function delete($id, Request $request) {
+        Product::where('id', $id)->delete();
+        Session::put('success', 'Product deleted successfully.');
+        return redirect('admin/products');
     }
 
     public function postAd(Request $request) {

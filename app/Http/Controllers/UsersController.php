@@ -108,6 +108,12 @@ class UsersController extends Controller
         return redirect('admin/users');
 	}
 
+	public function delete($id, Request $request) {
+		User::where('id', $id)->delete();
+		Session::put('success', 'User deleted successfully.');
+        return redirect('admin/users');
+	}
+
 	public function register(Request $request) {
 
 	    $validator = Validator::make($request->all(), [
