@@ -2,10 +2,11 @@
     <section class="sidebar">
         <div class="user-panel">
             <div class="pull-left image">
-                <img src="{{ asset('images/user2-160x160.jpg') }}" class="img-circle" alt="User Image">
+                @php ($userAvatar = (Auth::user()->avatar_name) ? Auth::user()->avatar_name : 'default_avatar.png')
+                <img src="{{ asset('user_avatars/'.$userAvatar) }}" class="img-circle" alt="User Image">
             </div>
             <div class="pull-left info">
-                <p>Alexander Pierce</p>
+                <p>{{ Auth::user()->name }}</p>
             </div>
         </div>
         <ul class="sidebar-menu" data-widget="tree">

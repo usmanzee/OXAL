@@ -11,6 +11,7 @@ use App\Product;
 use App\Category;
 use App\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 
 class ProductsController extends Controller
 {
