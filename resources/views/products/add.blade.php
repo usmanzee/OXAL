@@ -76,7 +76,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="images">Choose Images</label>
-                                <input type="file" class="form-control" name="images" id="images" placeholder="Choose images" multiple onchange="showMultipleImages(this);" required>
+                                <input type="file" class="form-control" name="images[]" id="images" placeholder="Choose images" multiple onchange="showMultipleImages(this);" required>
                                 <br>
                                 <div class="preview-area">
                                 </div>
@@ -102,12 +102,11 @@
     $(document).ready(function() {
         $("#add_product_form").validate();
         $('.select2').select2();
-
     });
 
     function showMultipleImages(input) {
         if(input.files) {
-
+            $('#preview_area').html('');
             var fileList = input.files;
             var anyWindow = window.URL || window.webkitURL;
             for(var i = 0; i < fileList.length; i++) {

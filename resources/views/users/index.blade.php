@@ -41,6 +41,7 @@
                                     <td>@if($user->verified) Yes @else No @endif</td>
                                     <td>@if($user->verified) Admin @else Simple User @endif</td>
                                     <td>
+                                        <a href="{!! url('admin/users/reviews/'.$user->id) !!}" class="btn btn-info btn-sm">Reviews</a>
                                         <a href="{!! url('admin/users/edit/'.$user->id) !!}" class="btn btn-primary btn-sm">Edit</a>
                                         <a class="btn btn-danger btn-sm" id="delete_button_{{ $user->id }}" userId = "{{ $user->id }}" onclick="deleteFormSubmit(this)">Delete</a>
                                         <form id="delete_user_form_{{ $user->id }}" action="{{ action('UsersController@delete', $user->id) }}" method="POST" style="display: none;">

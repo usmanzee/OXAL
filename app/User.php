@@ -31,6 +31,14 @@ class User extends Authenticatable
         return $this->hasMany('App\Product');
     }
 
+    public function receivedReviews() {
+        $this->hasMany('App\UserReview');
+    }
+
+    public function givenReviews() {
+        $this->hasMany('App\UserReview', 'user_reviewer_id', 'id');
+    }
+
     public function getUserById($id="") {
 
         return self::where('id', $id)->first();

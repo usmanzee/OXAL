@@ -29,5 +29,8 @@ Route::group(['prefix' => 'v1'], function() {
 	Route::post('get-featured-products', 'ProductsController@getFeaturedProducts');
 	Route::post('get-products-by-category', 'ProductsController@getProductsByCategory');
 	Route::post('get-product-detail', 'ProductsController@getProductDetail');
+	Route::post('update-user-profile', 'UsersController@updateUserProfile');
+	Route::post('add-user-review', 'UsersController@addUserReview');
+	Route::post('get-user-reviews', 'UsersController@getUserReviews');
 });
 

@@ -9,6 +9,7 @@ use Redirect;
 use App\User;
 use Validator;
 use App\Helper;
+use App\UserReview;
 use Illuminate\Http\Request;
 
 class UsersController extends Controller
@@ -32,8 +33,16 @@ class UsersController extends Controller
 	        'cnic_or_passport_number' => 'required'
         ]);
 
-		$input = $request->all();
-		$input['password'] = bcrypt($input['password']);
+		//$input = $request->all();
+		$params = [
+        	'name' => $request->name,
+			'email' => $request->email,
+			'phone_number' => $request->phone_number,
+			'cnic_or_passport_number' => $request->cnic_or_passport_number,
+        ];
+		$params['phone_number'] = preg_replace("/[^0-9.]/", "", $request->phone_number);
+		$params['password'] = bcrypt($request->password);
+
         $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
 	    if($request->hasFile('file')) {
 	    	$file = $request->file('file');
@@ -49,13 +58,13 @@ class UsersController extends Controller
 				}
     			$file->move($path, $uploadName);
 
-		        $input['avatar_name'] = $uploadName;
-		        $input['avatar_name_without_ext'] = $uploadNameWithoutExt;
-		        $input['avatar_ext'] = $extension;
+		        $params['avatar_name'] = $uploadName;
+		        $params['avatar_name_without_ext'] = $uploadNameWithoutExt;
+		        $params['avatar_ext'] = $extension;
     		}
 	    }
 
-        $user = User::create($input);
+        $user = User::create($params);
 
         Session::put('success', 'User created successfully.');
         return redirect('admin/users');
@@ -114,6 +123,15 @@ class UsersController extends Controller
         return redirect('admin/users');
 	}
 
+	public function reviews($id) {
+		$userReviews = UserReview::with('user')->with('reviewer')->where('user_id', $id)->get();
+		return view('users/reviews', compact('userReviews'));
+	}
+
+
+
+
+	//APIS
 	public function register(Request $request) {
 
 	    $validator = Validator::make($request->all(), [
@@ -226,5 +244,89 @@ class UsersController extends Controller
                 ];
 			}
 		return response()->json($output);
+	}
+
+	public function updateUserProfile(Request $request) {
+		$userId = $request->userId;
+
+		$this->validate($request,[
+            'name' => 'required',
+	        'phone_number' => 'required',
+	        'cnic_or_passport_number' => 'required'
+        ]);
+
+        $params = [
+        	'name' => $request->name,
+			'phone_number' => $request->phone_number,
+			'cnic_or_passport_number' => $request->cnic_or_passport_number,
+        ];
+
+        if((isset($request->password) && isset($request->confirmPassword)) && $request->password == $request->confirmPassword) {
+        	$params['password'] = bcrypt($request->password);
+        }
+
+        $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+	    if($request->hasFile('avatar')) {
+	    	$file = $request->file('avatar');
+    		$extension = $file->getClientOriginalExtension();
+    		$uploadNameWithoutExt = date('Ymd-His');
+    		$uploadName = date('Ymd-His').'.'.$extension;
+
+    		if(in_array($extension, $allowedfileExtension)) {
+
+    			$path = public_path('user_avatars');
+				if(!File::exists($path)) {
+					File::makeDirectory($path, $mode = 0777, true, true);
+				}
+    			$file->move($path, $uploadName);
+
+		        $params['avatar_name'] = $uploadName;
+		        $params['avatar_name_without_ext'] = $uploadNameWithoutExt;
+		        $params['avatar_ext'] = $extension;
+    		}
+	    }
+        User::where('id', $userId)->update($params);
+
+        $output = [
+			'status' => true,
+			'data' => 'User profile updated successfully.'
+		];
+		return response()->json($output);
+	}
+
+	public function addUserReview(Request $request) {
+		$userId = $request->userId;
+		$reviewerUserId = $request->reviewerUserId;
+		$comment = $request->comment;
+		UserReview::create([
+			'user_id' => $userId,
+			'reviewer_user_id' => $reviewerUserId,
+			'comment' => $comment
+		]);
+
+		$output = [
+			'status' => true,
+			'data' => 'User review added successfully.'
+		];
+		return response()->json($output);
+	}
+
+	public function getUserReviews(Request $request) {
+		$userId = $request->userId;
+		$userReviews = UserReview::with('user')->with('reviewer')->where('user_id', $userId)->get();
+
+		if($userReviews->count()) {
+			$output = [
+				'status' => true,
+				'data' => $userReviews
+			];
+		} else {
+			$output = [
+				'status' => false,
+				'message' => 'No review found.'
+			];
+		}
+		return response()->json($output);
+
 	}
 }

@@ -44,6 +44,7 @@ class ProductsController extends Controller
         ]);
 
         $input = $request->all();
+        $product = Product::create($input);
 
         $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
         if($request->hasFile('images')) {
@@ -57,7 +58,7 @@ class ProductsController extends Controller
 
                 if(in_array($extension, $allowedfileExtension)) {
 
-                    $path = public_path('Product Images');
+                    $path = public_path('product_images');
                     if(!File::exists($path)) {
                         File::makeDirectory($path, $mode = 0777, true, true);
                     }
@@ -73,8 +74,6 @@ class ProductsController extends Controller
             }
         }
 
-        $user = Product::create($input);
-
         Session::put('success', 'Product created successfully.');
         return redirect('admin/products');
     }
@@ -89,41 +88,72 @@ class ProductsController extends Controller
 
     public function update($id, Request $request) {
 
-        $this->validate($request,[
-            'name' => 'required',
-            'email' => 'required|email',
-            'phone_number' => 'required',
-            'cnic_or_passport_number' => 'required'
+        // dd($request->all());
+
+        $this->validate($request, [
+            'title' => 'required',
+            'condition' => 'required',
+            'description' => 'required',
+            'user_id' => 'required',
+            'category_id' => 'required',
+            'price' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'area' => 'required',
+            'longitude' => 'required',
+            'laptitude' => 'required'
         ]);
 
         $params = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone_number' => $request->phone_number,
-            'cnic_or_passport_number' => $request->cnic_or_passport_number,
+            'title' => $request->title,
+            'user_id' => $request->user_id,
+            'category_id' => $request->category_id,
+            'condition' => $request->condition,
+            'description' => $request->description,
+            'price' => $request->price,
+            'province' => $request->province,
+            'city' => $request->city,
+            'area' => $request->area,
+            'longitude' => $request->longitude,
+            'laptitude' => $request->laptitude,
         ];
+        $params['featured'] = (isset($request->featured) && $request->featured) ? $request->featured : 0;
+
+        Product::where('id', $id)->update($params);
 
         $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
-        if($request->hasFile('file')) {
-            $file = $request->file('file');
-            $extension = $file->getClientOriginalExtension();
-            $uploadNameWithoutExt = date('Ymd-His');
-            $uploadName = date('Ymd-His').'.'.$extension;
+        if($request->hasFile('images')) {
+            $images = $request->file('images');
+            foreach ($images as $key => $image) {
 
-            if(in_array($extension, $allowedfileExtension)) {
+                //$imageName = $image->getClientOriginalName();
+                $extension = $image->getClientOriginalExtension();
+                $uploadNameWithoutExt = date('Ymd-His').'-'.$key;
+                $uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
 
-                $path = public_path('user_avatars');
-                if(!File::exists($path)) {
-                    File::makeDirectory($path, $mode = 0777, true, true);
+                if(in_array($extension, $allowedfileExtension)) {
+
+                    $path = public_path('product_images');
+                    if(!File::exists($path)) {
+                        File::makeDirectory($path, $mode = 0777, true, true);
+                    }
+                    $image->move($path, $uploadName);
+                    $productImageParams = [
+                        'product_id' => $id,
+                        'name' => $uploadName,
+                        'name_without_ext' => $uploadNameWithoutExt,
+                        'ext' => $extension
+                    ];
+                    ProductImage::create($productImageParams);
                 }
-                $file->move($path, $uploadName);
-
-                $params['avatar_name'] = $uploadName;
-                $params['avatar_name_without_ext'] = $uploadNameWithoutExt;
-                $params['avatar_ext'] = $extension;
             }
         }
-        User::where('id', $id)->update($params);
+
+        if(isset($request->images_to_delete)) {
+            foreach ($request->images_to_delete as $key => $image_to_delete) {
+                ProductImage::where('id', $image_to_delete)->delete();
+            }
+        }
 
         Session::put('success', 'Product updated successfully.');
         return redirect('admin/products');
@@ -135,6 +165,9 @@ class ProductsController extends Controller
         return redirect('admin/products');
     }
 
+    
+
+    //APIS
     public function postAd(Request $request) {
 
     	$validator = Validator::make($request->all(), [
@@ -175,7 +208,7 @@ class ProductsController extends Controller
 
 	    		if(in_array($extension, $allowedfileExtension)) {
 
-	    			$path = public_path('Product Images');
+	    			$path = public_path('product_images');
 					if(!File::exists($path)) {
 						File::makeDirectory($path, $mode = 0777, true, true);
 					}
@@ -207,8 +240,13 @@ class ProductsController extends Controller
 
         $selectRaw = "*";
         $selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
+        
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
-        $query = Product::selectRaw($selectRaw)->with('user');
+        $query = Product::selectRaw($selectRaw)->with('user')
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }]);
         $query->where('title', 'LIKE', '%' .$searchedWord. '%')->orwhere('description', 'LIKE', '%' .$searchedWord. '%')->where('sold', 0);
         if(!empty($laptitude) && !empty($longitude)) {
             $query->orderBy('distance_in_km', 'ASC');
@@ -235,7 +273,12 @@ class ProductsController extends Controller
         $limit = 15;
         $skip = ($page-1) * $limit;
 
-        $userProducts = Product::where('user_id', $userId)->get();
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
+        $userProducts = Product::where('user_id', $userId)
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }])
+                        ->get();
 
         if($userProducts->count()) {
             $output = [
@@ -263,8 +306,12 @@ class ProductsController extends Controller
 
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
-        $query = Product::selectRaw($selectRaw)->with('user');
+        $query = Product::selectRaw($selectRaw)->with('user')
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }]);
     	$query->where('featured', 1)->where('sold', 0);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
@@ -298,7 +345,12 @@ class ProductsController extends Controller
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $query = Product::selectRaw($selectRaw)->with('user');
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
+
+        $query = Product::selectRaw($selectRaw)->with('user')
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }]);
     	$query->where('category_id', $categoryId)->where('sold', 0);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
@@ -328,7 +380,12 @@ class ProductsController extends Controller
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $query = Product::selectRaw($selectRaw)->with('user');
+        $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
+
+        $query = Product::selectRaw($selectRaw)->with('user')
+                        ->with(['images' => function($imagesQuery) use ($path) {
+                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        }]);
     	$query->where('id', $productId);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');

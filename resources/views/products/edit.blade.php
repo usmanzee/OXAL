@@ -2,6 +2,33 @@
 @section('content')
 @section('css')
 <link href="{{ asset('css/select2.min.css') }}" rel="stylesheet">
+<style type="text/css">
+    .img-wrap {
+    position: relative;
+    display: inline-block;
+    border: 1px solid;
+    font-size: 0;
+}
+.img-wrap .close {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 100;
+    background-color: #FFF;
+    padding: 2px 2px 2px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.5;
+    text-align: center;
+    font-size: 22px;
+    line-height: 10px;
+    border-radius: 50%;
+}
+.img-wrap:hover .close {
+    opacity: 1;
+}
+</style>
 @endsection
 <div class="content-wrapper">
     <section class="content-header">
@@ -76,16 +103,24 @@
                             </div>
                             <div class="form-group">
                                 <label for="images">Choose Images</label>
-                                <input type="file" class="form-control" name="images" id="images" placeholder="Choose images" multiple onchange="showMultipleImages(this);" required>
+                                <input type="file" class="form-control" name="images[]" id="images" placeholder="Choose images" multiple onchange="showMultipleImages(this);">
                                 <br>
-                                <div class="preview-area">
+                                <div id="preview_area">
                                 </div>
+                                @foreach($product->images as $key => $image)
+                                <!-- <img src="{{ asset('product_images/'.$image->name) }}" style="height: 65px; width: 100px;"> -->
+                                <div class="img-wrap" id="image_wrap_id_{{ $image->id }}">
+                                    <span class="close delete_image" imageId="{{ $image->id }}" imageNumber="{{ $key+1 }}">&times;</span>
+                                    <img src="{{ asset('product_images/'.$image->name) }}" id="image_{{ $image->id }}" style="height: 65px; width: 100px;">
+                                </div>
+                                @endforeach
                             </div>
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkbox" value="1" name="featured" id="featured"> Featured
+                                    <input type="checkbox" value="1" name="featured" id="featured" @if($product->featured) checked @endif> Featured
                                 </label>
                             </div>
+                            <select id="images_to_delete" name="images_to_delete[]" multiple hidden></select>
                         </div>
                         <div class="box-footer">
                             <button type="submit" class="btn btn-primary">Submit</button>
@@ -103,16 +138,33 @@
         $("#add_product_form").validate();
         $('.select2').select2();
 
+        $('.delete_image').on('click', function(e) {
+            e.preventDefault();
+            //var id = $(this).closest('.img-wrap').find('img').data('id');
+            var imageId = $(this).attr('imageId');
+            var imageNumber = $(this).attr('imageNumber');
+            var result = confirm("Do you Want to delete this image?");
+            if (result) {
+                $("#image_wrap_id_"+imageId).remove();
+
+                $('#images_to_delete')
+                        .append($("<option></option>")
+                        .attr("value", imageId)
+                        .attr("selected", true)
+                        .text(imageId)); 
+            }
+        });
+
     });
 
     function showMultipleImages(input) {
         if(input.files) {
-
+            $('#preview_area').html('');
             var fileList = input.files;
             var anyWindow = window.URL || window.webkitURL;
             for(var i = 0; i < fileList.length; i++) {
                 var objectUrl = anyWindow.createObjectURL(fileList[i]);
-                $('.preview-area').append('<img src="' + objectUrl + '" style="height: 65px; width: 100px;" />');
+                $('#preview_area').append('<img src="' + objectUrl + '" style="height: 65px; width: 100px;" />');
                 window.URL.revokeObjectURL(fileList[i]);
             }
         }

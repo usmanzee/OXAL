@@ -12,4 +12,8 @@ class ProductImage extends Model
     protected $table = "product_images";
 
     protected $fillable = ['product_id', 'name', 'name_without_ext', 'ext'];
+
+    public function product() {
+    	return $this->belongsTo('App\Product');
+    }
 }

@@ -17,8 +17,6 @@ Route::get('/', function () {
 
 //Auth::routes();
 
-//Route::get('/home', 'HomeController@index')->name('home');
-
 Route::get('admin/login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('admin/login', 'Auth\LoginController@login');
 Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function() {
@@ -35,6 +33,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function() {
 		Route::get('edit/{id}', 'UsersController@edit');
 		Route::post('update/{id}', 'UsersController@update');
 		Route::post('delete/{id}', 'UsersController@delete');
+		Route::get('reviews/{id}', 'UsersController@reviews');
 	});
 
 	Route::group(['prefix' => 'categories'], function() {
