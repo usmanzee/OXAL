@@ -233,6 +233,33 @@ class ProductsController extends Controller
         return response()->json($output);
     }
 
+    public function deleteAd(Request $request) {
+        $userId = $request->userId;
+        $productId = $request->adId;
+        $product = Product::where('id', $productId)->first();
+        if(!is_null($product)) {
+
+            if($product->user_id == $userId) {
+                $response = Product::where('id', $productId)->delete();
+                $output = [
+                    'status' => true,
+                    'message' => "Product deleted successfully."
+                ];
+            } else {
+                $output = [
+                    'status' => false,
+                    'message' => "You don't have permission to delete this product."
+                ];
+            }
+        } else {
+            $output = [
+                'status' => false,
+                'message' => "Product does not exits."
+            ];
+        }
+        return response()->json($output);
+    }
+
     public function searchProducts(Request $request) {
         $searchedWord = $request->searchedWord;
         $page = (isset($request->page) && $request->page) ? $request->page : 1;
