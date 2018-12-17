@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+// use Str;
 use File;
 use Session;
 use App\User;
@@ -10,6 +11,7 @@ use App\Helper;
 use App\Product;
 use App\Category;
 use App\ProductImage;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 
@@ -261,7 +263,14 @@ class ProductsController extends Controller
     }
 
     public function searchProducts(Request $request) {
+
         $searchedWord = $request->searchedWord;
+        $laptitude = (isset($request->laptitude)) ? $request->laptitude : '';
+        $longitude = (isset($request->longitude)) ? $request->longitude : '';
+        $distance = (isset($request->distance)) ? $request->distance : '';
+        $price  = (isset($request->price )) ? $request->price  : '';
+        $categoryId = (isset($request->categoryId)) ? $request->categoryId : '';
+
         $page = (isset($request->page) && $request->page) ? $request->page : 1;
         $limit = 15;
         $skip = ($page-1) * $limit;
@@ -275,7 +284,24 @@ class ProductsController extends Controller
                         ->with(['images' => function($imagesQuery) use ($path) {
                                 $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
                         }]);
-        $query->where('title', 'LIKE', '%' .$searchedWord. '%')->orwhere('description', 'LIKE', '%' .$searchedWord. '%')->where('sold', 0);
+
+        $query->where('sold', 0);
+        if(!empty($categoryId)) {
+            $query->where('category_id', $categoryId);
+        }
+        if(!empty($searchedWord)) {
+            $query->where(function ($subQuery) use ($searchedWord){
+                $subQuery->where('title', 'LIKE', '%'.Str::lower($searchedWord).'%')
+                      ->orWhere('description', 'LIKE', '%'.Str::lower($searchedWord).'%');
+            });
+            //$query->where('title', 'LIKE', '%' .$searchedWord. '%')->orwhere('description', 'LIKE', '%' .$searchedWord. '%');
+        }
+        if(!empty($price)) {
+            $query->where('price', '<=', $price);
+        }
+        if(!empty($distance) && (!empty($laptitude) && !empty($longitude))) {
+            $query->having('distance_in_km', '<=', $distance);
+        }
         if(!empty($laptitude) && !empty($longitude)) {
             $query->orderBy('distance_in_km', 'ASC');
         }
