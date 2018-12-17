@@ -383,9 +383,9 @@ class ProductsController extends Controller
                         ->get();
 
         if($userProducts->count()) {
-            foreach ($products as $key => $product) {
-                if($product->images->isEmpty()) {
-                    $product->images['imageUrl'] = $defaultImagePath.'image-not-found.jpg';
+            foreach ($userProducts as $key => $userProduct) {
+                if($userProduct->images->isEmpty()) {
+                    $userProduct->images['imageUrl'] = $defaultImagePath.'image-not-found.jpg';
                 }
             }
             $output = [
