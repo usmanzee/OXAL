@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 // use Str;
 use File;
+use Image;
 use Session;
 use App\User;
 use Validator;
@@ -200,6 +201,7 @@ class ProductsController extends Controller
 	    $product = Product::create($input);
 
 	    $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+
 	    if($request->hasFile('images')) {
 	    	$images = $request->file('images');
 	    	foreach ($images as $key => $image) {
@@ -209,12 +211,12 @@ class ProductsController extends Controller
 	    		$uploadNameWithoutExt = date('Ymd-His').'-'.$key;
 	    		$uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
 
-	    		if(in_array($extension, $allowedfileExtension)) {
+                if(in_array($extension, $allowedfileExtension)) {
 
-	    			$path = public_path('product_images');
-					if(!File::exists($path)) {
-						File::makeDirectory($path, $mode = 0777, true, true);
-					}
+                    $path = public_path('product_images');
+                    if(!File::exists($path)) {
+                        File::makeDirectory($path, $mode = 0777, true, true);
+                    }
 	    			$image->move($path, $uploadName);
 	    			$productImageParams = [
 	    				'product_id' => $product->id,
@@ -226,6 +228,31 @@ class ProductsController extends Controller
 	    		}
 	    	}
 	    }
+
+        if(!empty($request->images)) {
+            foreach ($request->images as $key => $image) {
+
+                $extension = explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+                $uploadNameWithoutExt = date('Ymd-His').'-'.$key;
+                $uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
+
+                if(in_array($extension, $allowedfileExtension)) {
+
+                    $path = public_path('product_images');
+                    if(!File::exists($path)) {
+                        File::makeDirectory($path, $mode = 0777, true, true);
+                    }
+                    Image::make($image)->save($path.$uploadName);
+                    $productImageParams = [
+                        'product_id' => $product->id,
+                        'name' => $uploadName,
+                        'name_without_ext' => $uploadNameWithoutExt,
+                        'ext' => $extension
+                    ];
+                    ProductImage::create($productImageParams);
+                }
+            }
+        }
 	    $output = [
             'status' => true,
             'data' => $product,
@@ -333,7 +360,7 @@ class ProductsController extends Controller
             $query->where('category_id', $categoryId);
         }
         if(!empty($searchedWord)) {
-            $query->where(function ($subQuery) use ($searchedWord){
+            $query->where(function ($subQuery) use ($searchedWord) {
                 $subQuery->where('title', 'LIKE', '%'.Str::lower($searchedWord).'%')
                       ->orWhere('description', 'LIKE', '%'.Str::lower($searchedWord).'%');
             });
@@ -533,5 +560,38 @@ class ProductsController extends Controller
 
         return response()->json($output);
 
+    }
+
+    public function imagesTest(Request $request) {
+        if(!empty($request->images)) {
+
+            $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+
+            foreach ($request->images as $key => $image) {
+
+                $extension = explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+                $uploadNameWithoutExt = date('Ymd-His').'-'.$key;
+                $uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
+
+                if(in_array($extension, $allowedfileExtension)) {
+
+                    $path = public_path('images_test');
+                    if(!File::exists($path)) {
+                        File::makeDirectory($path, $mode = 0777, true, true);
+                    }
+                    Image::make($image)->save($path.$uploadName);
+                }
+            }
+            $output = [
+                'status' => true,
+                'message' => 'Uploaded successfully.'
+            ];
+        } else {
+            $output = [
+                'status' => false,
+                'message' => 'No image found.'
+            ];
+        }
+        return response()->json($output);
     }
 }
