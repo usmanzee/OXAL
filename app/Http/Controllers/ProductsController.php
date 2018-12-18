@@ -202,47 +202,50 @@ class ProductsController extends Controller
 
 	    $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
 
-	    if($request->hasFile('images')) {
-	    	$images = $request->file('images');
-	    	foreach ($images as $key => $image) {
+	    // if($request->hasFile('images')) {
+	    // 	$images = $request->file('images');
+	    // 	foreach ($images as $key => $image) {
 
-	    		//$imageName = $image->getClientOriginalName();
-	    		$extension = $image->getClientOriginalExtension();
-	    		$uploadNameWithoutExt = date('Ymd-His').'-'.$key;
-	    		$uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
+	    // 		//$imageName = $image->getClientOriginalName();
+	    // 		$extension = $image->getClientOriginalExtension();
+	    // 		$uploadNameWithoutExt = date('Ymd-His').'-'.$key;
+	    // 		$uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
 
-                if(in_array($extension, $allowedfileExtension)) {
+     //            if(in_array($extension, $allowedfileExtension)) {
 
-                    $path = public_path('product_images');
-                    if(!File::exists($path)) {
-                        File::makeDirectory($path, $mode = 0777, true, true);
-                    }
-	    			$image->move($path, $uploadName);
-	    			$productImageParams = [
-	    				'product_id' => $product->id,
-	    				'name' => $uploadName,
-	    				'name_without_ext' => $uploadNameWithoutExt,
-	    				'ext' => $extension
-	    			];
-	    			ProductImage::create($productImageParams);
-	    		}
-	    	}
-	    }
+     //                $path = public_path('product_images');
+     //                if(!File::exists($path)) {
+     //                    File::makeDirectory($path, $mode = 0777, true, true);
+     //                }
+	    // 			$image->move($path, $uploadName);
+	    // 			$productImageParams = [
+	    // 				'product_id' => $product->id,
+	    // 				'name' => $uploadName,
+	    // 				'name_without_ext' => $uploadNameWithoutExt,
+	    // 				'ext' => $extension
+	    // 			];
+	    // 			ProductImage::create($productImageParams);
+	    // 		}
+	    // 	}
+	    // }
 
         if(!empty($request->images)) {
+            
             foreach ($request->images as $key => $image) {
 
                 $extension = explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+                $base64Str = substr($image, strpos($image, ",")+1);
+
                 $uploadNameWithoutExt = date('Ymd-His').'-'.$key;
                 $uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
 
                 if(in_array($extension, $allowedfileExtension)) {
 
-                    $path = public_path('product_images');
+                    $path = public_path('product_images/');
                     if(!File::exists($path)) {
                         File::makeDirectory($path, $mode = 0777, true, true);
                     }
-                    Image::make($image)->save($path.$uploadName);
+                    Image::make($base64Str)->save($path.$uploadName);
                     $productImageParams = [
                         'product_id' => $product->id,
                         'name' => $uploadName,
@@ -563,6 +566,7 @@ class ProductsController extends Controller
     }
 
     public function imagesTest(Request $request) {
+
         if(!empty($request->images)) {
 
             $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
@@ -570,16 +574,20 @@ class ProductsController extends Controller
             foreach ($request->images as $key => $image) {
 
                 $extension = explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+
+                $base64Str = substr($image, strpos($image, ",")+1);
+                //$imageTest = base64_decode($base64_str);
+
                 $uploadNameWithoutExt = date('Ymd-His').'-'.$key;
                 $uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
 
                 if(in_array($extension, $allowedfileExtension)) {
 
-                    $path = public_path('images_test');
+                    $path = public_path('images_test/');
                     if(!File::exists($path)) {
                         File::makeDirectory($path, $mode = 0777, true, true);
                     }
-                    Image::make($image)->save($path.$uploadName);
+                    $result = Image::make($base64Str)->save($path.$uploadName);
                 }
             }
             $output = [
