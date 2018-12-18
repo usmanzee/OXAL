@@ -310,7 +310,8 @@ class ProductsController extends Controller
         $laptitude = (isset($request->laptitude)) ? $request->laptitude : '';
         $longitude = (isset($request->longitude)) ? $request->longitude : '';
         $distance = (isset($request->distance)) ? $request->distance : '';
-        $price  = (isset($request->price )) ? $request->price  : '';
+        $minPrice  = (isset($request->minPrice )) ? $request->minPrice  : '';
+        $maxPrice  = (isset($request->maxPrice )) ? $request->maxPrice  : '';
         $categoryId = (isset($request->categoryId)) ? $request->categoryId : '';
 
         $page = (isset($request->page) && $request->page) ? $request->page : 1;
@@ -338,8 +339,11 @@ class ProductsController extends Controller
             });
             //$query->where('title', 'LIKE', '%' .$searchedWord. '%')->orwhere('description', 'LIKE', '%' .$searchedWord. '%');
         }
-        if(!empty($price)) {
-            $query->where('price', '<=', $price);
+        if(!empty($minPrice) && !empty($maxPrice)) {
+            //$query->where('price', '=>', $minPrice);
+            $query->where(function($subQuery) use ($minPrice, $maxPrice) {
+                $subQuery->where('price', '>=', $minPrice)->where('price', '<=', $maxPrice);
+            });
         }
         if(!empty($distance) && (!empty($laptitude) && !empty($longitude))) {
             $query->having('distance_in_km', '<=', $distance);
