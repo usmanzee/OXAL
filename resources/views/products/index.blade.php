@@ -55,8 +55,8 @@
                                     <td>{{ $product->laptitude }}</td>
                                     <td>@if($product->featured) Yes @else No @endif</td>
                                     <td>@if($product->sold) Yes @else No @endif</td>
-                                    <td>{{ $product->user->name }}</td>
                                     <td>{{ $product->category->title }}</td>
+                                    <td>{{ $product->user->name }}</td>
                                     <td>{{ $product->created_at }}</td>
                                     <td>
                                         <!-- <a href="#" class="btn btn-primary btn-sm">Edit</a>
@@ -103,7 +103,9 @@
 <script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#example1').DataTable();
+        $('#example1').DataTable({
+            "scrollX": true
+        });
     });
 
     function deleteFormSubmit(input) {
