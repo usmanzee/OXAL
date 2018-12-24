@@ -180,6 +180,9 @@ return [
         //Image intervention
         Intervention\Image\ImageServiceProvider::class,
 
+        //CORS
+        Barryvdh\Cors\ServiceProvider::class,
+
     ],
 
     /*
