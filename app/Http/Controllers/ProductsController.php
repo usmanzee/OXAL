@@ -380,7 +380,8 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $product->images[] = $path.'image-not-found.jpg';
+                    $images['imageURL'] = $path.'image-not-found.jpg';
+                    $product->images[] = $images;
                 }
             }
             $output = [
@@ -404,16 +405,17 @@ class ProductsController extends Controller
         $skip = ($page-1) * $limit;
 
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
-        $userProducts = Product::where('user_id', $userId)
-                        ->with(['images' => function($imagesQuery) use ($path) {
-                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
-                        }])
+        $userProducts = Product::where('user_id', $userId)->with('images')
+                        // ->with(['images' => function($imagesQuery) use ($path) {
+                        //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        // }])
                         ->get();
 
         if($userProducts->count()) {
             foreach ($userProducts as $key => $userProduct) {
                 if($userProduct->images->isEmpty()) {
-                    $userProduct->images['imageUrl'] = $path.'image-not-found.jpg';
+                    $images['imageURL'] = $path.'image-not-found.jpg';
+                    $userProduct->images[] = $images;
                 }
             }
             $output = [
@@ -444,10 +446,10 @@ class ProductsController extends Controller
 
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
-        $query = Product::selectRaw($selectRaw)->with('user')
-                        ->with(['images' => function($imagesQuery) use ($path) {
-                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
-                        }]);
+        $query = Product::selectRaw($selectRaw)->with('user')->with('images');
+                        // ->with(['images' => function($imagesQuery) use ($path) {
+                        //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        // }]);
     	$query->where('featured', 1);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
@@ -456,7 +458,8 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $product->images['imageUrl'] = $path.'image-not-found.jpg';
+                    $images['imageURL'] = $path.'image-not-found.jpg';
+                    $product->images[] = $images;
                 }
             }
         	$output = [
@@ -488,10 +491,10 @@ class ProductsController extends Controller
 
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
-        $query = Product::selectRaw($selectRaw)->with('user')
-                        ->with(['images' => function($imagesQuery) use ($path) {
-                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
-                        }]);
+        $query = Product::selectRaw($selectRaw)->with('user')->with('images');
+                        // ->with(['images' => function($imagesQuery) use ($path) {
+                        //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        // }]);
     	$query->where('category_id', $categoryId);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
@@ -500,7 +503,8 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $product->images['imageUrl'] = $path.'image-not-found.jpg';
+                    $images['imageURL'] = $path.'image-not-found.jpg';
+                    $product->images[] = $images;
                 }
             }
         	$output = [
@@ -528,10 +532,10 @@ class ProductsController extends Controller
 
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
-        $query = Product::selectRaw($selectRaw)->with('user')
-                        ->with(['images' => function($imagesQuery) use ($path) {
-                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
-                        }]);
+        $query = Product::selectRaw($selectRaw)->with('user')->with('images');
+                        // ->with(['images' => function($imagesQuery) use ($path) {
+                        //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        // }]);
     	$query->where('id', $productId);
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
@@ -539,7 +543,8 @@ class ProductsController extends Controller
     	$product = $query->first();
         if(!is_null($product)) {
             if($product->images->isEmpty()) {
-                $product->images['imageUrl'] = $path.'image-not-found.jpg';
+                $images['imageURL'] = $path.'image-not-found.jpg';
+                $product->images[] = $images;
             }
         	$output = [
         		'status' => true,
