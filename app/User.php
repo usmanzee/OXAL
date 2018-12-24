@@ -34,12 +34,12 @@ class User extends Authenticatable
     //implement the attribute
     public function getAvatarUrlAttribute()
     {
-        $path = Config::get('urls.site_url').'/'.Config::get('urls.user_avatar_url');
+        $path = url(Config::get('urls.user_avatar_url'));
         $avatarName = $this->avatar_name;
         if(!is_null($avatarName)) {
             $avatarUrl = $path.$avatarName;
         } else {
-            $avatarUrl = $path.'default_avatar.png';
+            $avatarUrl = $path.'/'.'default_avatar.png';
         }
         return $avatarUrl;
     }
