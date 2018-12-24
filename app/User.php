@@ -37,7 +37,7 @@ class User extends Authenticatable
         $path = url(Config::get('urls.user_avatar_url'));
         $avatarName = $this->avatar_name;
         if(!is_null($avatarName)) {
-            $avatarUrl = $path.$avatarName;
+            $avatarUrl = $path.'/'.$avatarName;
         } else {
             $avatarUrl = $path.'/'.'default_avatar.png';
         }
