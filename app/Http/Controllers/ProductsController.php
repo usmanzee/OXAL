@@ -182,10 +182,7 @@ class ProductsController extends Controller
 	        'description' => 'required',
 	        'price' => 'required',
 	        'province' => 'required',
-			'city' => 'required',
-			'area' => 'required',
-			'longitude' => 'required',
-			'laptitude' => 'required'
+			'city' => 'required'
 	    ]);
 
 	    if($validator->fails()) {
