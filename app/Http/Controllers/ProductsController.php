@@ -299,7 +299,6 @@ class ProductsController extends Controller
 
         $selectRaw = "*";
         $selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
-        $defaultImagePath = Config::get('urls.site_url') . '/' . Config::get('urls.default_product_image_url');
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
         $query = Product::selectRaw($selectRaw)->with('user')
@@ -314,7 +313,7 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $product->images['imageUrl'] = $defaultImagePath.'image-not-found.jpg';
+                    $product->images[] = $path.'image-not-found.jpg';
                 }
             }
             $output = [
@@ -348,13 +347,12 @@ class ProductsController extends Controller
         $selectRaw = "*";
         $selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $defaultImagePath = Config::get('urls.site_url') . '/' . Config::get('urls.default_product_image_url');
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
-        $query = Product::selectRaw($selectRaw)->with('user')
-                        ->with(['images' => function($imagesQuery) use ($path) {
-                                $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
-                        }]);
+        $query = Product::selectRaw($selectRaw)->with('user')->with('images');
+                        // ->with(['images' => function($imagesQuery) use ($path) {
+                        //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
+                        // }]);
 
         if(!empty($categoryId)) {
             $query->where('category_id', $categoryId);
@@ -382,7 +380,7 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $product->images['imageUrl'] = $defaultImagePath.'image-not-found.jpg';
+                    $product->images[] = $path.'image-not-found.jpg';
                 }
             }
             $output = [
@@ -405,7 +403,6 @@ class ProductsController extends Controller
         $limit = 15;
         $skip = ($page-1) * $limit;
 
-        $defaultImagePath = Config::get('urls.site_url') . '/' . Config::get('urls.default_product_image_url');
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
         $userProducts = Product::where('user_id', $userId)
                         ->with(['images' => function($imagesQuery) use ($path) {
@@ -416,7 +413,7 @@ class ProductsController extends Controller
         if($userProducts->count()) {
             foreach ($userProducts as $key => $userProduct) {
                 if($userProduct->images->isEmpty()) {
-                    $userProduct->images['imageUrl'] = $defaultImagePath.'image-not-found.jpg';
+                    $userProduct->images['imageUrl'] = $path.'image-not-found.jpg';
                 }
             }
             $output = [
@@ -445,7 +442,6 @@ class ProductsController extends Controller
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $defaultImagePath = Config::get('urls.site_url') . '/' . Config::get('urls.default_product_image_url');
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
         $query = Product::selectRaw($selectRaw)->with('user')
@@ -460,7 +456,7 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $product->images['imageUrl'] = $defaultImagePath.'image-not-found.jpg';
+                    $product->images['imageUrl'] = $path.'image-not-found.jpg';
                 }
             }
         	$output = [
@@ -490,7 +486,6 @@ class ProductsController extends Controller
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $defaultImagePath = Config::get('urls.site_url') . '/' . Config::get('urls.default_product_image_url');
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
         $query = Product::selectRaw($selectRaw)->with('user')
@@ -505,7 +500,7 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $product->images['imageUrl'] = $defaultImagePath.'image-not-found.jpg';
+                    $product->images['imageUrl'] = $path.'image-not-found.jpg';
                 }
             }
         	$output = [
@@ -531,7 +526,6 @@ class ProductsController extends Controller
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $defaultImagePath = Config::get('urls.site_url') . '/' . Config::get('urls.default_product_image_url');
         $path = Config::get('urls.site_url') . '/' . Config::get('urls.product_images_url');
 
         $query = Product::selectRaw($selectRaw)->with('user')
@@ -545,7 +539,7 @@ class ProductsController extends Controller
     	$product = $query->first();
         if(!is_null($product)) {
             if($product->images->isEmpty()) {
-                $product->images['imageUrl'] = $defaultImagePath.'image-not-found.jpg';
+                $product->images['imageUrl'] = $path.'image-not-found.jpg';
             }
         	$output = [
         		'status' => true,

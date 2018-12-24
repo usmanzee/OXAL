@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\Config;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -18,6 +19,9 @@ class User extends Authenticatable
         'name', 'email', 'password', 'cnic_or_passport_number', 'phone_number', 'avatar_name', 'avatar_name_without_ext', 'avatar_ext', 'verification_code' ,'verified'
     ];
 
+    //Make it available in the json response
+    protected $appends = ['avatarUrl'];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -26,6 +30,19 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    //implement the attribute
+    public function getAvatarUrlAttribute()
+    {
+        $path = Config::get('urls.site_url').Config::get('urls.user_avatar_url');
+        $avatarName = $this->avatar_name;
+        if(!is_null($avatarName)) {
+            $avatarUrl = $path.$avatarName;
+        } else {
+            $avatarUrl = $path.'default_avatar.png';
+        }
+        return $avatarUrl;
+    }
 
     public function products() {
         return $this->hasMany('App\Product');
