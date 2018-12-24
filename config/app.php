@@ -183,6 +183,9 @@ return [
         //CORS
         Barryvdh\Cors\ServiceProvider::class,
 
+        //Paypal
+        Srmklive\PayPal\Providers\PayPalServiceProvider::class,
+
     ],
 
     /*
@@ -231,7 +234,10 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        //Imageintervation
         'Image' => Intervention\Image\Facades\Image::class,
+        //Paypal
+        'PayPal' => Srmklive\PayPal\Facades\PayPal::class,
 
     ],
 
