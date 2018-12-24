@@ -20,7 +20,7 @@ class ProductImage extends Model
     //implement the attribute
     public function getImageUrlAttribute()
     {
-        $path = Config::get('urls.site_url').Config::get('urls.product_images_url');
+        $path = Config::get('urls.site_url').'/'.Config::get('urls.product_images_url');
         $imageName = $this->name;
         if(!is_null($imageName)) {
             $avatarUrl = $path.$imageName;
