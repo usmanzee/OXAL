@@ -313,7 +313,8 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $product->images[] = $path.'image-not-found.jpg';
+                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
+                    $product->images[] = $images;
                 }
             }
             $output = [
