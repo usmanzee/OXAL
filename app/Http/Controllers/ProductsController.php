@@ -380,7 +380,7 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $images['imageURL'] = $path.'/'.'image-not-found.jpg';
+                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
                     $product->images[] = $images;
                 }
             }
@@ -414,7 +414,7 @@ class ProductsController extends Controller
         if($userProducts->count()) {
             foreach ($userProducts as $key => $userProduct) {
                 if($userProduct->images->isEmpty()) {
-                    $images['imageURL'] = $path.'/'.'image-not-found.jpg';
+                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
                     $userProduct->images[] = $images;
                 }
             }
@@ -458,7 +458,7 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $images['imageURL'] = $path.'/'.'image-not-found.jpg';
+                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
                     $product->images[] = $images;
                 }
             }
@@ -503,7 +503,7 @@ class ProductsController extends Controller
         if($products->count()) {
             foreach ($products as $key => $product) {
                 if($product->images->isEmpty()) {
-                    $images['imageURL'] = $path.'/'.'image-not-found.jpg';
+                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
                     $product->images[] = $images;
                 }
             }
@@ -543,7 +543,7 @@ class ProductsController extends Controller
     	$product = $query->first();
         if(!is_null($product)) {
             if($product->images->isEmpty()) {
-                $images['imageURL'] = $path.'/'.'image-not-found.jpg';
+                $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
                 $product->images[] = $images;
             }
         	$output = [
