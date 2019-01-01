@@ -14,6 +14,7 @@ use App\Category;
 use App\ProductImage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\UserProductPaymentDetail;
 use Illuminate\Support\Facades\Config;
 
 class ProductsController extends Controller
@@ -561,6 +562,63 @@ class ProductsController extends Controller
         return response()->json($output);
 
     }
+
+    public function saveProductPaymentDetail(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'userId' => 'required',
+            'productId' => 'required',
+            'date' => 'required',
+            'days' => 'required'
+        ]);
+
+        if($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors(),
+                'message' => "Please provide valid information."
+            ]);
+        }
+
+        $product = Product::where('id', $request->productId)->where('user_id', $request->userId)->first();
+        if(!is_null($product)) {
+            if(!$product->featured) {
+
+                UserProductPaymentDetail::create([
+                    'user_id' => $request->userId,
+                    'product_id' => $request->productId,
+                    'paid_at' => date('Y-m-d H:i:s', strtotime($request->date)),
+                    'featured_for_days' => $request->days
+                ]);
+
+                Product::where('id', $product->id)->update([
+                    'featured' => 1
+                ]);
+                $output = [
+                    'status' => true,
+                    'message' => 'Product marked as featured.'
+                ];
+            } else {
+                $output = [
+                    'status' => false,
+                    'message' => 'Product is already featured.'
+                ];
+            }
+        } else {
+            $output = [
+                'status' => false,
+                'message' => 'Product not found.'
+            ];
+        }
+        return response()->json($output);
+    }
+
+
+
+
+
+    /**
+    * Test
+    */
 
     public function imagesTest(Request $request) {
 

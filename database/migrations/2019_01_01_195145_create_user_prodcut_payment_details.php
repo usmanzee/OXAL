@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUserReviewsTable extends Migration
+class CreateUserProdcutPaymentDetails extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,12 @@ class CreateUserReviewsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_reviews' , function (Blueprint $table) {
+        Schema::create('user_product_payment_details' , function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->default(0);
-            $table->integer('reviewer_user_id')->default(0);
-            $table->string('comment')->nullable();
+            $table->integer('product_id')->default(0);
+            $table->dateTime('paid_at')->nullable();
+            $table->integer('featured_for_days')->nullable()->comment('Number of days');
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ class CreateUserReviewsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_reviews');
+        Schema::dropIfExists('user_product_payment_details');
     }
 }
