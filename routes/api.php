@@ -35,6 +35,8 @@ Route::group(['prefix' => 'v1'], function() {
 	Route::post('add-user-review', 'UsersController@addUserReview');
 	Route::post('get-user-reviews', 'UsersController@getUserReviews');
 	Route::post('save-product-payment-detail', 'ProductsController@saveProductPaymentDetail');
+	Route::get('check-product-payment-status', 'ProductsController@checkProductPaymentStatus');
+	Route::get('test-cron-job', 'ProductsController@testCronJob');
 
 
 

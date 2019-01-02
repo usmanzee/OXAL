@@ -612,6 +612,25 @@ class ProductsController extends Controller
         return response()->json($output);
     }
 
+    public function checkProductPaymentStatus() {
+
+        $currentDate = date('Y-m-d');
+        $payments = UserProductPaymentDetail::where('expired', 0)->get();
+        foreach ($payments as $key => $payment) {
+            $paidDate = date('Y-m-d', strtotime($payment->paid_at));
+            $daysDiff = (strtotime($currentDate) - strtotime($paidDate)) / (60 * 60 * 24);
+
+            if($daysDiff > 0 && $daysDiff >= $payment->featured_for_days) {
+                Product::where('id', $payment->product_id)->update([
+                    'featured' => 0
+                ]);
+                UserProductPaymentDetail::where('id', $payment->id)->update([
+                    'expired' => 1
+                ]);
+            }
+        }
+    }
+
 
 
 
@@ -656,5 +675,11 @@ class ProductsController extends Controller
             ];
         }
         return response()->json($output);
+    }
+
+    public function testCronJob() {
+        UserProductPaymentDetail::where('id', 1)->update([
+            'expired' => 1
+        ]);
     }
 }
