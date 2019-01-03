@@ -20,6 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['prefix' => 'v1'], function() {
 	Route::post('register', 'UsersController@register');
 	Route::post('login', 'UsersController@login');
+	Route::post('social-login', 'UsersController@socialLogin');
+	Route::post('check-email', 'UsersController@checkEmail');
 	Route::post('get-all-categories', 'CategoriesController@getAllCategories');
 	Route::post('get-user-detail', 'UsersController@getUserDetail');
 	Route::post('update-user-phone-number-and-send-verification-code', 'UsersController@updateUserPhoneNumberAndSendVerificationCode');

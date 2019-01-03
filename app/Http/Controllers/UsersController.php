@@ -204,6 +204,39 @@ class UsersController extends Controller
         return response()->json($output);
 	}
 
+	public function socialLogin(Request $request) {
+
+		$validator = Validator::make($request->all(), [
+	        'name' => 'required',
+	        'email' => 'required|email',
+	        'password' => 'required'
+	    ]);
+
+	    if($validator->fails()) {
+	        return [
+	            'status' => false,
+	            'errors' => $validator->errors(),
+	            'message' => "Please provide valid information."
+	        ];
+	    }
+
+	    $user = User::where('email', $request->email)->first();
+	    if(is_null($user)) {
+
+	        $input = $request->all();
+	        $input['password'] = bcrypt($input['password']);
+	        $user = User::create($input);
+
+	    }
+	    $output = [
+            'status' => true,
+            'data' => $user,
+            'message' => 'You are logged-in.'
+        ];
+
+	    return response()->json($output);
+	}
+
 	public function getUserDetail(Request $request) {
 
 		$userId = $request->userId;
@@ -221,6 +254,21 @@ class UsersController extends Controller
 			];
 		}
 
+		return response()->json($output);
+	}
+
+	public function checkEmail(Request $request) {
+		if(User::where('email', $request->email)->exists()) {
+			$output = [
+				'status' => true,
+				'message' => 'Email already exists.'
+			];
+		} else {
+			$output = [
+				'status' => false,
+				'message' => 'Email does not exists.'
+			];
+		}
 		return response()->json($output);
 	}
 
