@@ -307,6 +307,7 @@ class ProductsController extends Controller
                                 $imagesQuery->selectRaw('*, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
                         }]);
         $query->orderBy('featured', 'DESC');
+        $query->orderBy('created_at', 'DESC');
         if(!empty($laptitude) && !empty($longitude)) {
             $query->orderBy('distance_in_km', 'ASC');
         }
