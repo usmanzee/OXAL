@@ -456,6 +456,7 @@ class ProductsController extends Controller
                         //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
                         // }]);
     	$query->where('featured', 1);
+        $query->orderBy('created_at', 'DESC');
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
     	}
@@ -501,6 +502,8 @@ class ProductsController extends Controller
                         //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
                         // }]);
     	$query->where('category_id', $categoryId);
+        $query->orderBy('featured', 'DESC');
+        $query->orderBy('created_at', 'DESC');
     	if(!empty($laptitude) && !empty($longitude)) {
     		$query->orderBy('distance_in_km', 'ASC');
     	}
