@@ -376,6 +376,8 @@ class ProductsController extends Controller
         if(!empty($distance) && (!empty($laptitude) && !empty($longitude))) {
             $query->having('distance_in_km', '<=', $distance);
         }
+        $query->orderBy('featured', 'DESC');
+        $query->orderBy('created_at', 'DESC');
         if(!empty($laptitude) && !empty($longitude)) {
             $query->orderBy('distance_in_km', 'ASC');
         }
@@ -412,7 +414,7 @@ class ProductsController extends Controller
                         // ->with(['images' => function($imagesQuery) use ($path) {
                         //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
                         // }])
-                        ->get();
+                        ->skip($skip)->take($limit)->get();
 
         if($userProducts->count()) {
             foreach ($userProducts as $key => $userProduct) {
