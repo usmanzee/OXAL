@@ -11,7 +11,9 @@ use Validator;
 use App\Helper;
 use App\Product;
 use App\Category;
+use App\BusinessAd;
 use App\ProductImage;
+use App\BusinessAdImage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\UserProductPaymentDetail;
@@ -263,6 +265,62 @@ class ProductsController extends Controller
         return response()->json($output);
     }
 
+    public function postBusinessAd(Request $request) {
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required',
+            'user_id' => 'required',
+            'url' => 'required'
+        ]);
+
+        if($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors(),
+                'message' => "Please provide valid information."
+            ]);
+        }
+
+        $input = $request->all();
+        $businessAd = BusinessAd::create($input);
+
+        $allowedfileExtension = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'];
+
+        if(!empty($request->images)) {
+            foreach ($request->images as $key => $image) {
+
+                $extension = explode('/', explode(':', substr($image, 0, strpos($image, ';')))[1])[1];
+                $base64Str = substr($image, strpos($image, ",")+1);
+
+                $uploadNameWithoutExt = date('Ymd-His').'-'.$key;
+                $uploadName = date('Ymd-His').'-'.$key.'.'.$extension;
+
+                if(in_array($extension, $allowedfileExtension)) {
+
+                    $path = public_path('business_ads_images/');
+                    if(!File::exists($path)) {
+                        File::makeDirectory($path, $mode = 0777, true, true);
+                    }
+                    Image::make($base64Str)->save($path.$uploadName);
+                    $productImageParams = [
+                        'business_ad_id' => $businessAd->id,
+                        'name' => $uploadName,
+                        'name_without_ext' => $uploadNameWithoutExt,
+                        'ext' => $extension
+                    ];
+                    BusinessAdImage::create($productImageParams);
+                }
+            }
+        }
+        $output = [
+            'status' => true,
+            'data' => $businessAd,
+            'message' => 'Your business ad posted successfully.'
+        ];
+
+        return response()->json($output);
+    }
+
     public function deleteAd(Request $request) {
         $userId = $request->userId;
         $productId = $request->adId;
@@ -311,12 +369,28 @@ class ProductsController extends Controller
         if(!empty($laptitude) && !empty($longitude)) {
             $query->orderBy('distance_in_km', 'ASC');
         }
+        $businessAds = BusinessAd::with('images')->get();
         $products = $query->skip($skip)->take($limit)->get();
+
         if($products->count()) {
             foreach ($products as $key => $product) {
+                $product->businessAd = false;
                 if($product->images->isEmpty()) {
                     $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
                     $product->images[] = $images;
+                }
+            }
+            $offsetToInsertBusinessAd = 2;
+            foreach ($businessAds as $key => $businessAd) {
+                $businessAd->businessAd = true;
+                if($businessAd->images->isEmpty()) {
+                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
+                    $businessAd->images[] = $images;
+                }
+                $products->splice($offsetToInsertBusinessAd, 0, [$businessAd]);
+                $offsetToInsertBusinessAd += $offsetToInsertBusinessAd;
+                if($offsetToInsertBusinessAd >= $products->count()) {
+                    break;
                 }
             }
             $output = [
