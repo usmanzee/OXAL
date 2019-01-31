@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Config;
 
 class ProductsController extends Controller
 {
+    public $offsetToInsertBusinessAd = 5;
     public function index() {
         $products = Product::with('user')->with('category')->get();
 
@@ -369,30 +370,12 @@ class ProductsController extends Controller
         if(!empty($laptitude) && !empty($longitude)) {
             $query->orderBy('distance_in_km', 'ASC');
         }
-        $businessAds = BusinessAd::with('images')->get();
         $products = $query->skip($skip)->take($limit)->get();
 
         if($products->count()) {
-            foreach ($products as $key => $product) {
-                $product->businessAd = false;
-                if($product->images->isEmpty()) {
-                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
-                    $product->images[] = $images;
-                }
-            }
-            $offsetToInsertBusinessAd = 2;
-            foreach ($businessAds as $key => $businessAd) {
-                $businessAd->businessAd = true;
-                if($businessAd->images->isEmpty()) {
-                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
-                    $businessAd->images[] = $images;
-                }
-                $products->splice($offsetToInsertBusinessAd, 0, [$businessAd]);
-                $offsetToInsertBusinessAd += $offsetToInsertBusinessAd;
-                if($offsetToInsertBusinessAd >= $products->count()) {
-                    break;
-                }
-            }
+            Product::addEmptyImageInProducts($products);
+            $businessAds = BusinessAd::with('images')->get();
+            Product::addBusinessAdToProducts($products, $businessAds, $this->offsetToInsertBusinessAd);
             $output = [
                 'status' => true,
                 'data' => $products
@@ -424,7 +407,7 @@ class ProductsController extends Controller
         $selectRaw = "*";
         $selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $path = url(Config::get('urls.product_images_url'));
+        // $path = url(Config::get('urls.product_images_url'));
 
         $query = Product::selectRaw($selectRaw)->with('user')->with('images');
                         // ->with(['images' => function($imagesQuery) use ($path) {
@@ -457,12 +440,9 @@ class ProductsController extends Controller
         }
         $products = $query->skip($skip)->take($limit)->get();
         if($products->count()) {
-            foreach ($products as $key => $product) {
-                if($product->images->isEmpty()) {
-                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
-                    $product->images[] = $images;
-                }
-            }
+            Product::addEmptyImageInProducts($products);
+            $businessAds = BusinessAd::with('images')->get();
+            Product::addBusinessAdToProducts($products, $businessAds, $this->offsetToInsertBusinessAd);
             $output = [
                 'status' => true,
                 'data' => $products
@@ -483,7 +463,7 @@ class ProductsController extends Controller
         $limit = 15;
         $skip = ($page-1) * $limit;
 
-        $path = url(Config::get('urls.product_images_url'));
+        // $path = url(Config::get('urls.product_images_url'));
         $userProducts = Product::where('user_id', $userId)->with('images')
                         // ->with(['images' => function($imagesQuery) use ($path) {
                         //         $imagesQuery->selectRaw('id, product_id, name, name_without_ext, ext, CASE WHEN name != "" AND name IS NOT NULL THEN CONCAT("'.$path.'", "/", name) ELSE NULL END AS imageUrl');
@@ -491,12 +471,7 @@ class ProductsController extends Controller
                         ->skip($skip)->take($limit)->get();
 
         if($userProducts->count()) {
-            foreach ($userProducts as $key => $userProduct) {
-                if($userProduct->images->isEmpty()) {
-                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
-                    $userProduct->images[] = $images;
-                }
-            }
+            Product::addEmptyImageInProducts($userProducts);
             $output = [
                 'status' => true,
                 'data' => $userProducts
@@ -523,7 +498,7 @@ class ProductsController extends Controller
     	$selectRaw = "*";
     	$selectRaw .= (!empty($laptitude) && !empty($longitude)) ? ', round(111.1111 * DEGREES(ACOS(COS(RADIANS(laptitude)) * COS(RADIANS('.$laptitude.')) * COS(RADIANS(longitude - '.$longitude.')) + SIN(RADIANS(laptitude)) * SIN(RADIANS('.$laptitude.')))), 1) AS distance_in_km' : '';
 
-        $path = url(Config::get('urls.product_images_url'));
+        // $path = url(Config::get('urls.product_images_url'));
 
         $query = Product::selectRaw($selectRaw)->with('user')->with('images');
                         // ->with(['images' => function($imagesQuery) use ($path) {
@@ -536,12 +511,7 @@ class ProductsController extends Controller
     	}
     	$products = $query->skip($skip)->take($limit)->get();
         if($products->count()) {
-            foreach ($products as $key => $product) {
-                if($product->images->isEmpty()) {
-                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
-                    $product->images[] = $images;
-                }
-            }
+            Product::addEmptyImageInProducts($products);
         	$output = [
         		'status' => true,
         		'data' => $products

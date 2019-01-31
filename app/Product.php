@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -23,5 +24,39 @@ class Product extends Model
     
     public function images() {
     	return $this->hasMany('App\ProductImage');
+    }
+
+    public static function addEmptyImageInProducts($products) {
+        $path = url(Config::get('urls.product_images_url'));
+
+        foreach ($products as $key => $product) {
+            $product->businessAd = false;
+            if($product->images->isEmpty()) {
+                $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
+                $product->images[] = $images;
+            }
+        }
+    }
+
+    public static function addBusinessAdToProducts($products, $businessAds, $defaultOffsetToInsert = 5) {
+        $path = url(Config::get('urls.product_images_url'));
+        $offsetToInsert = $defaultOffsetToInsert;
+        if($products->count() > 5) {
+            if($businessAds->count()) {
+                foreach ($businessAds as $key => $businessAd) {
+                    $businessAd->businessAd = true;
+                    if($businessAd->images->isEmpty()) {
+                        $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
+                        $businessAd->images[] = $images;
+                    }
+                    $products->splice($offsetToInsert, 0, [$businessAd]);
+                    if($offsetToInsert >= $products->count()) { 
+                        $offsetToInsert += $defaultOffsetToInsert;
+                    } else { 
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
