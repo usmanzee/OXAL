@@ -41,22 +41,21 @@ class Product extends Model
     public static function addBusinessAdToProducts($products, $businessAds, $defaultOffsetToInsert = 5) {
         $path = url(Config::get('urls.product_images_url'));
         $offsetToInsert = $defaultOffsetToInsert;
-        if($products->count() > 5) {
-            if($businessAds->count()) {
-                foreach ($businessAds as $key => $businessAd) {
-                    $businessAd->businessAd = true;
-                    if($businessAd->images->isEmpty()) {
-                        $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
-                        $businessAd->images[] = $images;
-                    }
-                    $products->splice($offsetToInsert, 0, [$businessAd]);
-                    if($offsetToInsert >= $products->count()) { 
-                        $offsetToInsert += $defaultOffsetToInsert;
-                    } else { 
-                        break;
-                    }
+        if($businessAds->count()) {
+            foreach ($businessAds as $key => $businessAd) {
+                $businessAd->businessAd = true;
+                if($businessAd->images->isEmpty()) {
+                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
+                    $businessAd->images[] = $images;
                 }
+                $products->splice($offsetToInsert, 0, [$businessAd]);
+                $offsetToInsert += $defaultOffsetToInsert;
+                // if($offsetToInsert >= $products->count()) { 
+                // } else { 
+                //     break;
+                // }
             }
         }
+        
     }
 }

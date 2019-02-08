@@ -472,6 +472,8 @@ class ProductsController extends Controller
 
         if($userProducts->count()) {
             Product::addEmptyImageInProducts($userProducts);
+            $businessAds = BusinessAd::with('images')->get();
+            Product::addBusinessAdToProducts($userProducts, $businessAds, $this->offsetToInsertBusinessAd);
             $output = [
                 'status' => true,
                 'data' => $userProducts
@@ -512,6 +514,8 @@ class ProductsController extends Controller
     	$products = $query->skip($skip)->take($limit)->get();
         if($products->count()) {
             Product::addEmptyImageInProducts($products);
+            $businessAds = BusinessAd::with('images')->get();
+            Product::addBusinessAdToProducts($products, $businessAds, $this->offsetToInsertBusinessAd);
         	$output = [
         		'status' => true,
         		'data' => $products
@@ -553,12 +557,15 @@ class ProductsController extends Controller
     	}
     	$products = $query->skip($skip)->take($limit)->get();
         if($products->count()) {
-            foreach ($products as $key => $product) {
-                if($product->images->isEmpty()) {
-                    $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
-                    $product->images[] = $images;
-                }
-            }
+            Product::addEmptyImageInProducts($products);
+            $businessAds = BusinessAd::with('images')->get();
+            Product::addBusinessAdToProducts($products, $businessAds, $this->offsetToInsertBusinessAd);
+            // foreach ($products as $key => $product) {
+            //     if($product->images->isEmpty()) {
+            //         $images['imageUrl'] = $path.'/'.'image-not-found.jpg';
+            //         $product->images[] = $images;
+            //     }
+            // }
         	$output = [
         		'status' => true,
         		'data' => $products
