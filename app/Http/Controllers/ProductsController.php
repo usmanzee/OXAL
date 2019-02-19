@@ -470,10 +470,10 @@ class ProductsController extends Controller
                         // }])
                         ->skip($skip)->take($limit)->get();
 
+        $businessAds = BusinessAd::where('user_id', $userId)->with('images')->get();
+        Product::addBusinessAdToProducts($userProducts, $businessAds, $this->offsetToInsertBusinessAd);
         if($userProducts->count()) {
             Product::addEmptyImageInProducts($userProducts);
-            $businessAds = BusinessAd::where('user_id', $userId)->with('images')->get();
-            Product::addBusinessAdToProducts($userProducts, $businessAds, $this->offsetToInsertBusinessAd);
             $output = [
                 'status' => true,
                 'data' => $userProducts
@@ -481,7 +481,7 @@ class ProductsController extends Controller
         } else {
             $output = [
                 'status' => false,
-                'message' => 'No feature ad found.'
+                'message' => 'No User ad found.'
             ];
         }
 
