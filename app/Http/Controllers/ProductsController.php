@@ -472,7 +472,7 @@ class ProductsController extends Controller
 
         if($userProducts->count()) {
             Product::addEmptyImageInProducts($userProducts);
-            $businessAds = BusinessAd::with('images')->get();
+            $businessAds = BusinessAd::where('user_id', $userId)->with('images')->get();
             Product::addBusinessAdToProducts($userProducts, $businessAds, $this->offsetToInsertBusinessAd);
             $output = [
                 'status' => true,
