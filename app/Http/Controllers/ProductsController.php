@@ -374,7 +374,7 @@ class ProductsController extends Controller
 
         if($products->count()) {
             Product::addEmptyImageInProducts($products);
-            $businessAds = BusinessAd::with('images')->get();
+            $businessAds = BusinessAd::with('images')->skip($skip)->take($limit)->get();
             Product::addBusinessAdToProducts($products, $businessAds, $this->offsetToInsertBusinessAd);
             $output = [
                 'status' => true,
@@ -441,7 +441,7 @@ class ProductsController extends Controller
         $products = $query->skip($skip)->take($limit)->get();
         if($products->count()) {
             Product::addEmptyImageInProducts($products);
-            $businessAds = BusinessAd::with('images')->get();
+            $businessAds = BusinessAd::with('images')->skip($skip)->take($limit)->get();
             Product::addBusinessAdToProducts($products, $businessAds, $this->offsetToInsertBusinessAd);
             $output = [
                 'status' => true,
@@ -470,7 +470,7 @@ class ProductsController extends Controller
                         // }])
                         ->skip($skip)->take($limit)->get();
 
-        $businessAds = BusinessAd::where('user_id', $userId)->with('images')->get();
+        $businessAds = BusinessAd::where('user_id', $userId)->with('images')->skip($skip)->take($limit)->get();
         Product::addBusinessAdToProducts($userProducts, $businessAds, $this->offsetToInsertBusinessAd);
         if($userProducts->count()) {
             Product::addEmptyImageInProducts($userProducts);
@@ -514,7 +514,7 @@ class ProductsController extends Controller
     	$products = $query->skip($skip)->take($limit)->get();
         if($products->count()) {
             Product::addEmptyImageInProducts($products);
-            $businessAds = BusinessAd::with('images')->get();
+            $businessAds = BusinessAd::with('images')->skip($skip)->take($limit)->get();
             Product::addBusinessAdToProducts($products, $businessAds, $this->offsetToInsertBusinessAd);
         	$output = [
         		'status' => true,
@@ -558,7 +558,7 @@ class ProductsController extends Controller
     	$products = $query->skip($skip)->take($limit)->get();
         if($products->count()) {
             Product::addEmptyImageInProducts($products);
-            $businessAds = BusinessAd::with('images')->get();
+            $businessAds = BusinessAd::with('images')->skip($skip)->take($limit)->get();
             Product::addBusinessAdToProducts($products, $businessAds, $this->offsetToInsertBusinessAd);
             // foreach ($products as $key => $product) {
             //     if($product->images->isEmpty()) {
